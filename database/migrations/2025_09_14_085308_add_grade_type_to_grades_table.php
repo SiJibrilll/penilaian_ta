@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('grades', function (Blueprint $table) {
-            $table->id();
-            $table->integer('grade');
-            $table->foreignId('dosen_id')->references('id')->on('users')->onDelete('cascade');
-            $table->timestamps();
+        Schema::table('grades', function (Blueprint $table) {
+            $table->foreignId('grade_type_id')->references('id')->on('grade_types')->onDelete('cascade');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('grades');
+        Schema::table('grades', function (Blueprint $table) {
+            //
+        });
     }
 };

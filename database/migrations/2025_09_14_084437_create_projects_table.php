@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dosen_profiles', function (Blueprint $table) {
+        Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('nidn');
-            $table->enum('role', ['PEMBIMBING', 'PENGAWAS', 'PENGAMPU']);
+            $table->boolean('finalized')->default(false);
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dosen_profiles');
+        Schema::dropIfExists('projects');
     }
 };
