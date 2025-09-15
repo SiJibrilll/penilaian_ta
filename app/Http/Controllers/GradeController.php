@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Grade;
+use App\Models\User;
+use App\Models\GradeType;
 
 class GradeController extends Controller
 {
@@ -19,7 +22,17 @@ class GradeController extends Controller
      */
     public function create()
     {
-        //
+        $mahasiswa = User::students()->get();
+
+        $dosen = User::dosen()->with('dosenProfile')->get();
+
+        $gradeTypes = GradeType::all();
+
+        return view('penilaian', [
+            "mahasiswa" => $mahasiswa,
+            "dosen" => $dosen,
+            "penilaian" => $gradeTypes
+        ]);
     }
 
     /**

@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -44,5 +46,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+   // relasi ke profile mahasiswa
+    public function mahasiswaProfile(): HasOne
+    {
+        return $this->hasOne(MahasiswaProfile::class, 'user_id');
+    }
+
+    // relasi ke profile dosen
+    public function dosenProfile(): HasOne
+    {
+        return $this->hasOne(DosenProfile::class, 'user_id');
+    }
+
+    // ambil mahasiswa saja
+    public function scopeStudents($query)
+    {
+        return $query->whereHas('mahasiswaProfile');
+    }
+
+    // ambil dosen saja
+    public function scopeDosen($query)
+    {
+        return $query->whereHas('dosenProfile');
     }
 }
