@@ -178,16 +178,22 @@
             <p>Sistem Penilaian Tugas Akhir</p>
         </div>
         
-        <form id="gradingForm">
+        <form id="gradingForm" method="POST" action="/grades">
+            @csrf
+            
             <div class="form-group">
                 <label for="studentSelect">Pilih Mahasiswa</label>
                 <select id="studentSelect" name="student" required>
                     <option value="">-- Pilih Mahasiswa --</option>
                     @foreach($mahasiswa as $pilihan)
-                        <option value="{{$pilihan['id']}}">{{$pilihan['name']}}</option>
+                        <option value="{{ $pilihan['id'] }}" {{ old('student') == $pilihan['id'] ? 'selected' : '' }}>
+                            {{ $pilihan['name'] }}
+                        </option>
                     @endforeach
-                    
                 </select>
+                @error('student')
+                    <div class="error">{{ $message }}</div>
+                @enderror
             </div>
             
             <div class="form-group">
@@ -195,19 +201,27 @@
                 <select id="dosenSelect" name="dosen" required>
                     <option value="">-- Pilih Dosen --</option>
                     @foreach($dosen as $d)
-                        <option value="{{$d['id']}}">{{$d['name']}}</option>
+                        <option value="{{ $d['id'] }}" {{ old('dosen') == $d['id'] ? 'selected' : '' }}>
+                            {{ $d['name'] }}
+                        </option>
                     @endforeach
                 </select>
+                @error('dosen')
+                    <div class="error">{{ $message }}</div>
+                @enderror
             </div>
             
             <div class="form-group">
                 <label for="formatSelect">Pilih format penilaian</label>
                 <select id="formatSelect" name="format" required>
                     <option value="">-- Pilih format --</option>
-                    <option value="format1">0-4</option>
-                    <option value="format2">0-10</option>
-                    <option value="format3">0-100</option>
+                    <option value="format1" {{ old('format') == 'format1' ? 'selected' : '' }}>0-4</option>
+                    <option value="format2" {{ old('format') == 'format2' ? 'selected' : '' }}>0-10</option>
+                    <option value="format3" {{ old('format') == 'format3' ? 'selected' : '' }}>0-100</option>
                 </select>
+                @error('format')
+                    <div class="error">{{ $message }}</div>
+                @enderror
             </div>
             
             <div class="grades-section">
@@ -215,16 +229,21 @@
                 
                 @foreach($penilaian as $nilai)
                     <div class="grade-row">
-                        <div class="grade-label">Nilai {{$nilai['name']}}:</div>
+                        <div class="grade-label">Nilai {{ $nilai['name'] }}:</div>
                         <div class="grade-input">
-                            <input type="number" name="{{$nilai['id']}}">
+                            <input type="number" name="{{ $nilai['id'] }}" value="{{ old($nilai['id']) }}">
                         </div>
                     </div>
+                     @error($nilai['id'])
+                        <div class="error">{{ $message }}</div>
+                        <br>
+                    @enderror
                 @endforeach
             </div>
             
             <button type="submit" class="submit-btn">Submit Nilai</button>
         </form>
+
     </div>
 </body>
 </html>
