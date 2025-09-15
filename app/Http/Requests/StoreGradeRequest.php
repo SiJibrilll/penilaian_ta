@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\GradeType;
 
 class StoreGradeRequest extends FormRequest
 {
@@ -27,11 +28,19 @@ class StoreGradeRequest extends FormRequest
             'format'  => 'required|in:format1,format2,format3',
         ];
 
-        $penilaian = \App\Models\GradeType::all();
+        
+        $gradeTypeIds = GradeType::pluck('id')->map(fn ($id) => (string) $id)->toArray();
 
-        foreach ($penilaian as $nilai) {
-            $rules[(string) $nilai->id] = $this->gradeRuleForFormat();
+        
+        foreach ($gradeTypeIds as $id) {
+            $rules[$id] = $this->gradeRuleForFormat();
         }
+
+        
+        $this->replace(array_intersect_key(
+            $this->all(),
+            array_flip(array_merge(array_keys($rules), ['_token']))
+        ));
 
         return $rules;
     }

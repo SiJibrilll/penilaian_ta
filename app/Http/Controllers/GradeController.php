@@ -7,6 +7,8 @@ use App\Models\Grade;
 use App\Models\User;
 use App\Models\GradeType;
 use App\Http\Requests\StoreGradeRequest;
+use App\Models\Project;
+use Illuminate\Support\Arr;
 
 class GradeController extends Controller
 {
@@ -42,7 +44,59 @@ class GradeController extends Controller
     public function store(StoreGradeRequest $request)
     {
         $validated = $request->validated();
-        dd($validated);
+        
+        
+
+        // 1. Get student’s project
+        $project = Project::where('user_id', $validated['student'])->firstOrFail();
+    
+
+        // 2. Get dosen from form input (not from auth)
+        $dosen = User::findOrFail($validated['dosen']);
+        $role = $dosen->dosenProfile->role;
+        
+        // 3. Check if already graded by this role
+        $alreadyGraded = Grade::where('project_id', $project->id)
+            ->whereHas('dosen.dosenProfile', function ($query) use ($role) {
+                $query->where('role', $role);
+            })
+            ->exists();
+
+        if ($alreadyGraded) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'dosen' => "Mahasiswa ini sudah dinilai oleh seorang {$role}."
+                ])
+                ->withInput();
+        }
+
+        $format = match ($validated['format']) {
+            'format1' => 4,
+            'format2' => 10,
+            'format3' => 100,
+            default   => 100,
+        };
+
+        $gradesData = [];
+
+        foreach (Arr::except($validated, ['dosen', 'student', 'format']) as $gradeTypeId => $value) {
+            if (is_numeric($gradeTypeId)) {
+                $gradesData[] = [
+                    'grade_type_id' => $gradeTypeId,   // from input name
+                    'grade' => $value / $format,                 // from input value
+                    'dosen_id' => $dosen->id,
+                    'project_id' => $project->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        dd($gradesData);
+
+
+        Grade::insert($gradesData);
     }
 
     /**
