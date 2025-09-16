@@ -46,8 +46,8 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Nama Dosen</th>
                         <th>Role</th>
+                        <th>Nama Dosen</th>
                         <th>Nilai</th>
                         <th>Aksi</th>
                     </tr>
@@ -56,9 +56,9 @@
                    
                     @foreach ($dosenGrades as $grade)
                         <tr>
-                            <td>{{ $grade->dosen->name }}</td>
-                            <td>{{ $grade->dosen->dosenProfile->role }}</td>
-                            <td><span class="grade-value">{{ $grade->final_grade}}</span></td>
+                            <td>{{ $grade['role'] }}</td>
+                            <td>{{ $grade['dosen']->name ?? $grade['dosen'] }}</td>
+                            <td><span class="grade-value">{{ $grade['grade']}}</span></td>
                             <td>
                                 <button class="delete-btn" wire:click="deleteGrade({{ 1 }})">
                                     Hapus

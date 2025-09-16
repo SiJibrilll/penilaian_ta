@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\DB;
 
 class GradingResults extends Component
 {
+    public $roles;                  // role dosen
     public $students;              // list for dropdown
     public $selectedStudentId;     // chosen mahasiswa user_id
     public $selectedStudent;       // full user + relations
-    public $format = '100';    // grading format (can switch later)
+    public $format = '100';    // grading format 
     public $dosenGrades;
 
     
@@ -19,12 +20,14 @@ class GradingResults extends Component
     {
         // Only fetch mahasiswa users for dropdown
         $this->students = User::whereHas('mahasiswaProfile')->get();
+        $this->roles = $this->getEnumValues('dosen_profiles', 'role');
 
         if ($studentId) {
             $this->updatedSelectedStudentId($studentId);
         }
     }
 
+    // untuk mengambil enum dalam table
     function getEnumValues($table, $column) {
         $column = DB::selectOne("
             SELECT COLUMN_TYPE 
@@ -39,53 +42,9 @@ class GradingResults extends Component
         return array_map(fn($val) => trim($val, "'"), explode(',', $matches[1]));
     }
 
-    // untuk pergantian format penilaian
-    public function updatedFormat()
-    {
-        // Recalculate grades every time the format changes
-        $this->updateGrades();
-    }
-
-    // menggupdate penilaian tiap pergantian mahasiswa
-    protected function updateGrades()
-    {
-        $project = $this->selectedStudent->projects;
-        $this->dosenGrades = $this->calculateDosenGrades($project, $this->format);
-    }
-
-    protected function calculateDosenGrades($project, $format)
-    {
-        return $project->grades
-            ->groupBy('dosen_id')
-            ->map(function ($grades) use ($format) {
-                $finalGrade = $grades->reduce(function ($carry, $grade) use ($format) {
-                    return $carry + ($grade->grade * ($grade->gradeType->percentage / 100) * $format);
-                }, 0);
-
-                return (object) [
-                    'dosen' => $grades->first()->dosen,
-                    'final_grade' => $finalGrade,
-                ];
-            })
-            ->values();
-    }
-
-    protected function calculateGrade() {
-        // Fetch the student and their projects
-        $project = $this->selectedStudent->projects;
-
-        // Extract dosen grades separately
-        $this->dosenGrades = $this->calculateDosenGrades($project, $this->format);
-
-        
-
-        // Keep student as-is without polluting it
-        $this->selectedStudent->setRelation('projects', $project);
-    }
-
+    // ubah mahasiswa yang terpilih
     public function updatedSelectedStudentId($studentId)
     {
-        
         // Eager load the full graph when user is selected
         $user = User::with([
             'mahasiswaProfile',
@@ -94,13 +53,69 @@ class GradingResults extends Component
         ->has('mahasiswaProfile')
         ->find($studentId);
 
-        $this->selectedStudent = $user ?? null;
-
-        if ($this->selectedStudent) {
-            $this->calculateGrade();
+        if ($user) {
+            $this->selectedStudent = $user;
+            $this->initiate();
         }
         
         // dd($this->selectedStudent->projects);
+    }
+
+    function initiate() {
+        $user = $this->selectedStudent;
+        
+
+        //calculate grades
+        $calculatedGrade = $this->calculateDosenGrades($user->projects, $this->format);
+
+        
+        //arrange grades
+        $this->dosenGrades = $this->arrangeGrade($this->roles, $calculatedGrade);
+    }
+
+    // hitung total nilai yang diberikan seorang dosen
+protected function calculateDosenGrades($project, $format)
+{
+    return $project->grades
+        ->groupBy('dosen_id')
+        ->map(function ($grades) use ($format) {
+            // 1. Hitung nilai gabungan normalisasi (0 - 1)
+            $finalGrade = $grades->reduce(function ($carry, $grade) {
+                return $carry + ($grade->grade * ($grade->gradeType->percentage / 100));
+            }, 0);
+
+            // 2. Konversi ke format pilihan (misal 0-100, 0-10, 0-4)
+            $finalGrade *= $format;
+
+            return (object) [
+                'dosen' => $grades->first()->dosen,
+                'final_grade' => $finalGrade,
+            ];
+        })
+        ->values();
+}
+
+    // susun nilai yang sudah dihitung menjadi tabel
+    function arrangeGrade($rows, $data) {
+        
+        return collect($rows)->mapWithKeys(function ($row) use ($data) {
+            $match = collect($data)->first(function ($item) use ($row) {
+                return strtoupper($item->dosen->dosenProfile->role) === strtoupper($row);
+            });
+
+            return [
+                $row => $match 
+                    ? ['dosen' => $match->dosen, 'grade' => $match->final_grade, 'role' => $row]
+                    : ['dosen' => '-', 'grade' => '-', 'role' => $row],
+            ];
+        });
+    }
+
+    // untuk pergantian format penilaian
+    public function updatedFormat()
+    {
+        // Recalculate grades every time the format changes
+        $this->initiate();
     }
 
     public function render()
