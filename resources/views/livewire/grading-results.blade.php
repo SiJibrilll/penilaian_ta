@@ -72,8 +72,11 @@
         </div>
         <div class="cumulative-section">
             <h3>Nilai Kumulatif</h3>
-            <div class="cumulative-grade" id="cumulativeGrade">85.33</div>
-            <div class="grade-format">Format: 0-100 (Persentase)</div>
+            @if($cummulativeGrade)
+                <div class="cumulative-grade" id="cumulativeGrade">{{$cummulativeGrade}}</div>
+            @else
+                <div class="grade-format">Data belum lengkap</div>
+            @endif
         </div>
     </div>
     @else

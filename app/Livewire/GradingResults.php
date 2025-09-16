@@ -14,6 +14,7 @@ class GradingResults extends Component
     public $selectedStudent;       // full user + relations
     public $format = '100';    // grading format 
     public $dosenGrades;
+    public $cummulativeGrade;
 
     
     public function mount($studentId = null)
@@ -58,7 +59,7 @@ class GradingResults extends Component
             $this->initiate();
         }
         
-        // dd($this->selectedStudent->projects);
+        
     }
 
     function initiate() {
@@ -71,6 +72,15 @@ class GradingResults extends Component
         
         //arrange grades
         $this->dosenGrades = $this->arrangeGrade($this->roles, $calculatedGrade);
+
+        // cek apabila sudah bisa menampilkan nilai kumulatif
+        if(!$this->checkCummulative()) {
+            $this->cummulativeGrade = null;
+            return;
+        }
+
+        //bila semua dapat, maka hitung nilai kumulatif
+        $this->countCummulativeGrade();
     }
 
     // hitung total nilai yang diberikan seorang dosen
@@ -116,6 +126,37 @@ protected function calculateDosenGrades($project, $format)
     {
         // Recalculate grades every time the format changes
         $this->initiate();
+    }
+
+    // periksa apakah semua dosen sudah memberi nilai
+    function checkCummulative() {
+        return collect($this->dosenGrades)->every(function ($item) {
+            return $item['grade'] !== '-';
+        });
+    }
+
+    //berikan nilai kumulatif
+    function countCummulativeGrade() {
+       $totalGrade = collect($this->dosenGrades)
+        ->avg(function ($item) {
+            return $this->normalizeGrade($item['grade'], $this->format);
+        });
+
+        $this->cummulativeGrade = \DB::table('grade_parameters')
+        ->where('min', '<=', $totalGrade)
+        ->orderByDesc('min')
+        ->value('name') ?? "E";
+
+    }
+
+    // normalisasi nilai untuk perhitungan nilai kumulatif
+    function normalizeGrade($grade, $format) {
+        return match ($format) {
+            '4'   => ($grade / 4) * 100,
+            '10'  => ($grade / 10) * 100,
+            '100' => $grade, // already percentage
+            default => $grade, // fallback
+        };
     }
 
     public function render()

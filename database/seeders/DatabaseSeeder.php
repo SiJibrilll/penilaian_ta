@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             ['id' => 2, 'name' => 'Dosen B', 'password' => Hash::make('password')],
             ['id' => 3, 'name' => 'Mahasiswa A', 'password' => Hash::make('password')],
             ['id' => 4, 'name' => 'Mahasiswa B', 'password' => Hash::make('password')],
+            ['id' => 5, 'name' => 'Dosen C', 'password' => Hash::make('password')],
         ];
         DB::table('users')->insert($users);
 
@@ -28,6 +29,7 @@ class DatabaseSeeder extends Seeder
         $dosenProfiles = [
             ['id' => 1,  'nidn' => '1234567890', 'role' => 'PEMBIMBING', 'user_id' => 1],
             ['id' => 2,  'nidn' => '0987654321', 'role' => 'PENGAMPU', 'user_id' => 2],
+            ['id' => 3,  'nidn' => '0919281291', 'role' => 'PENGAWAS', 'user_id' => 5],
         ];
         DB::table('dosen_profiles')->insert($dosenProfiles);
 
@@ -55,10 +57,11 @@ class DatabaseSeeder extends Seeder
 
         // Grade Parameters (example ranges)
         $gradeParameters = [
-            ['id' => 1, 'name' => 'Excellent', 'min' => 85],
-            ['id' => 2, 'name' => 'Good', 'min' => 70],
-            ['id' => 3, 'name' => 'Fair', 'min' => 55],
-            ['id' => 4, 'name' => 'Poor', 'min' => 40],
+            ['id' => 1, 'name' => 'A', 'min' => 85],
+            ['id' => 2, 'name' => 'B', 'min' => 70],
+            ['id' => 3, 'name' => 'C', 'min' => 55],
+            ['id' => 4, 'name' => 'D', 'min' => 40],
+            ['id' => 5, 'name' => 'E', 'min' => 20],
         ];
         DB::table('grade_parameters')->insert($gradeParameters);
     }
