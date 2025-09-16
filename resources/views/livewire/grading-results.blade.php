@@ -22,8 +22,8 @@
 
     {{-- Format nilai --}}
     <div class="form-group">
-        <label for="studentSelect">Format nilai</label>
-        <select wire:model.live="selectedStudentId">
+        <label for="formatSelect">Format nilai</label>
+        <select wire:model.live="format">
             <option value="100">0-100</option>
             <option value="10">0-10</option>
             <option value="4">0-4</option>
@@ -54,11 +54,11 @@
                 </thead>
                 <tbody>
                    
-                    @foreach ($selectedStudent->projects->dosenGrades as $dosenId => $finalGrade)
+                    @foreach ($dosenGrades as $grade)
                         <tr>
-                            <td>{{ $selectedStudent->projects->grades->firstWhere('dosen_id', $dosenId)->dosen->name }}</td>
-                            <td>{{ $selectedStudent->projects->grades->firstWhere('dosen_id', $dosenId)->dosen->dosenProfile->role }}</td>
-                            <td><span class="grade-value">{{ $finalGrade }}</span></td>
+                            <td>{{ $grade->dosen->name }}</td>
+                            <td>{{ $grade->dosen->dosenProfile->role }}</td>
+                            <td><span class="grade-value">{{ $grade->final_grade}}</span></td>
                             <td>
                                 <button class="delete-btn" wire:click="deleteGrade({{ 1 }})">
                                     Hapus

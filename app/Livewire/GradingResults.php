@@ -4,13 +4,15 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class GradingResults extends Component
 {
     public $students;              // list for dropdown
     public $selectedStudentId;     // chosen mahasiswa user_id
     public $selectedStudent;       // full user + relations
-    public $format = 'average';    // grading format (can switch later)
+    public $format = '100';    // grading format (can switch later)
+    public $dosenGrades;
 
     
     public function mount($studentId = null)
@@ -23,21 +25,62 @@ class GradingResults extends Component
         }
     }
 
-    protected function calculateGrade() {
+    function getEnumValues($table, $column) {
+        $column = DB::selectOne("
+            SELECT COLUMN_TYPE 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = ? 
+            AND COLUMN_NAME = ?
+        ", [$table, $column]);
 
+        preg_match("/^enum\((.*)\)$/", $column->COLUMN_TYPE, $matches);
+
+        return array_map(fn($val) => trim($val, "'"), explode(',', $matches[1]));
+    }
+
+    // untuk pergantian format penilaian
+    public function updatedFormat()
+    {
+        // Recalculate grades every time the format changes
+        $this->updateGrades();
+    }
+
+    // menggupdate penilaian tiap pergantian mahasiswa
+    protected function updateGrades()
+    {
         $project = $this->selectedStudent->projects;
-        $dosenGrades = $project->grades
-        ->groupBy('dosen_id') // group grades by dosen
-        ->map(function($grades, $dosenId) {
-            return $grades->reduce(function($carry, $grade) {
-                // Weighted grade = grade * percentage / 100
-                return $carry + ($grade->grade * ($grade->gradeType->percentage / 100));
-            }, 0);
-        });
+        $this->dosenGrades = $this->calculateDosenGrades($project, $this->format);
+    }
 
-        // $dosenGrades is now an array with dosen_id => final grade
-        $project->dosenGrades = $dosenGrades;
-        $this->selectedStudent->projects = $project;
+    protected function calculateDosenGrades($project, $format)
+    {
+        return $project->grades
+            ->groupBy('dosen_id')
+            ->map(function ($grades) use ($format) {
+                $finalGrade = $grades->reduce(function ($carry, $grade) use ($format) {
+                    return $carry + ($grade->grade * ($grade->gradeType->percentage / 100) * $format);
+                }, 0);
+
+                return (object) [
+                    'dosen' => $grades->first()->dosen,
+                    'final_grade' => $finalGrade,
+                ];
+            })
+            ->values();
+    }
+
+    protected function calculateGrade() {
+        // Fetch the student and their projects
+        $project = $this->selectedStudent->projects;
+
+        // Extract dosen grades separately
+        $this->dosenGrades = $this->calculateDosenGrades($project, $this->format);
+
+        
+
+        // Keep student as-is without polluting it
+        $this->selectedStudent->setRelation('projects', $project);
     }
 
     public function updatedSelectedStudentId($studentId)
