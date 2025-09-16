@@ -202,7 +202,7 @@
                     <option value="">-- Pilih Dosen --</option>
                     @foreach($dosen as $d)
                         <option value="{{ $d['id'] }}" {{ old('dosen') == $d['id'] ? 'selected' : '' }}>
-                            {{ $d['name'] }}
+                            {{ $d['name'] }} ({{$d->dosenProfile->role}})
                         </option>
                     @endforeach
                 </select>
