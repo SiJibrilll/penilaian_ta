@@ -161,10 +161,26 @@ protected function calculateDosenGrades($project, $format)
     }
 
     function deleteGrade($dosenId) {
+        if ($this->selectedStudent->projects->finlized) {
+            return;
+        }
+
         Grade::where('dosen_id', $dosenId)
         ->where('project_id', $this->selectedStudent->projects->id)
         ->delete();
 
+        $this->initiate();
+    }
+
+    function finalize() {
+        // cek apakah nilai kumulatif sudah lengkap
+        if (!$this->checkCummulative()) {
+            return;
+        }
+
+        $project = $this->selectedStudent->projects;
+        $project->finalized = true;
+        $project->save();
         $this->initiate();
     }
 

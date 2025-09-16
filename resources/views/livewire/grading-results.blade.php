@@ -60,7 +60,7 @@
                             <td>{{ $grade['dosen']->name ?? $grade['dosen'] }}</td>
                             <td><span class="grade-value">{{ $grade['grade']}}</span></td>
                             <td>
-                                @if($grade['dosen'] != '-')
+                                @if($grade['dosen'] != '-' && !$selectedStudent->projects->finalized)
                                     <button class="delete-btn" wire:click="deleteGrade({{$grade['dosen']->id}})">
                                         Hapus
                                     </button>
@@ -76,6 +76,9 @@
         </div>
         <div class="cumulative-section">
             <h3>Nilai Kumulatif</h3>
+            @if($selectedStudent->projects->finalized)
+                <h3>(FINAL)</h3>
+            @endif 
             @if($cummulativeGrade)
                 <div class="cumulative-grade" id="cumulativeGrade">{{$cummulativeGrade}}</div>
             @else
@@ -83,8 +86,8 @@
             @endif
         </div>
 
-        @if($cummulativeGrade)
-        <button type="button" class="finalize-btn" id="finalizeBtn" onclick="finalizeGrades()">
+        @if($cummulativeGrade && !$selectedStudent->projects->finalized)
+        <button type="button" class="finalize-btn" id="finalizeBtn" wire:click="finalize"">
             Finalisasi Nilai
         </button>
         @endif
