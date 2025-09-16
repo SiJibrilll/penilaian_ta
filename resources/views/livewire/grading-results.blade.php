@@ -82,6 +82,15 @@
                 <div class="grade-format">Data belum lengkap</div>
             @endif
         </div>
+
+        @if($cummulativeGrade)
+        <button type="button" class="finalize-btn" id="finalizeBtn" onclick="finalizeGrades()">
+            Finalisasi Nilai
+        </button>
+        @endif
+        <button type="button" class="back-btn" id="back-btn" onclick="window.location='{{ url("/grades/create") }}'">
+            Kembali
+        </button>
     </div>
     @else
     {{-- Empty State --}}

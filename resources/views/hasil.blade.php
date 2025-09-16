@@ -199,6 +199,55 @@
             font-style: italic;
         }
         
+        .finalize-btn {
+            width: 100%;
+            background-color: #28a745;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 20px;
+        }
+        
+        .finalize-btn:hover {
+            background-color: #218838;
+        }
+        
+        .finalize-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .finalize-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            width: 100%;
+            background-color: #6c757d;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+        }
+        
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+        
+        .back-btn:active {
+            transform: translateY(1px);
+        }
+        
         .no-data {
             display: none;
         }
