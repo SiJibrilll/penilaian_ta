@@ -60,9 +60,13 @@
                             <td>{{ $grade['dosen']->name ?? $grade['dosen'] }}</td>
                             <td><span class="grade-value">{{ $grade['grade']}}</span></td>
                             <td>
-                                <button class="delete-btn" wire:click="deleteGrade({{ 1 }})">
-                                    Hapus
-                                </button>
+                                @if($grade['dosen'] != '-')
+                                    <button class="delete-btn" wire:click="deleteGrade({{$grade['dosen']->id}})">
+                                        Hapus
+                                    </button>
+                                @else
+                                    <div>-</div>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

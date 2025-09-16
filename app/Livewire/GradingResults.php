@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\User;
+use App\Models\Grade;
 use Illuminate\Support\Facades\DB;
 
 class GradingResults extends Component
@@ -157,6 +158,14 @@ protected function calculateDosenGrades($project, $format)
             '100' => $grade, // already percentage
             default => $grade, // fallback
         };
+    }
+
+    function deleteGrade($dosenId) {
+        Grade::where('dosen_id', $dosenId)
+        ->where('project_id', $this->selectedStudent->projects->id)
+        ->delete();
+
+        $this->initiate();
     }
 
     public function render()
