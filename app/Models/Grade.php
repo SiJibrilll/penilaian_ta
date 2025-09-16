@@ -20,4 +20,8 @@ class Grade extends Model
     function dosen() {
         return $this->belongsTo(User::class, 'dosen_id', 'id');
     }
+
+    function gradeType() {
+        return $this->belongsTo(GradeType::class, 'grade_type_id');
+    }
 }

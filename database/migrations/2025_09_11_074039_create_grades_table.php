@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('grades', function (Blueprint $table) {
             $table->id();
-            $table->integer('grade');
+            $table->float('grade');
             $table->foreignId('dosen_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

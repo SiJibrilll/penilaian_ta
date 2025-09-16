@@ -71,4 +71,8 @@ class User extends Authenticatable
     {
         return $query->whereHas('dosenProfile');
     }
+
+    public function projects() {
+        return $this->hasOne(Project::class, 'user_id');
+    }
 }

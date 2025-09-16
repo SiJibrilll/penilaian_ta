@@ -17,7 +17,11 @@ class GradeController extends Controller
      */
     public function index()
     {
-        //
+        $id = session('studentId') ?? null;
+
+        return view('hasil', [
+            "id" => $id
+        ]);
     }
 
     /**
@@ -92,11 +96,9 @@ class GradeController extends Controller
                 ];
             }
         }
-
-        dd($gradesData);
-
-
         Grade::insert($gradesData);
+
+        return redirect('/grades')->with('studentId', $project->user_id);
     }
 
     /**
@@ -104,7 +106,9 @@ class GradeController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return view('hasil', [
+            "id" => $id
+        ]);
     }
 
     /**
